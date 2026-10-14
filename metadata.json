@@ -1,0 +1,6 @@
+{
+  "name": "Rentier",
+  "description": "Private wealth marketplace for pre-rented residential properties with Day-1 rental cash flow, audited tenant histories, and remote due diligence for NRIs and investors.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
