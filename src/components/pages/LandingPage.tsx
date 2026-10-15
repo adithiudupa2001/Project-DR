@@ -1,70 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MOCK_PROPERTIES } from '../../data/mockProperties';
 import { PropertyCard } from '../property/PropertyCard';
-import { Check, FileText, CheckCircle2, ShieldCheck, UserCheck } from 'lucide-react';
-
-// Reusable viewport fade-up animation component
-const FadeInSection: React.FC<{
-  children: React.ReactNode;
-  className?: string;
-  id?: string;
-}> = ({ children, className = '', id }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(() => {
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return true;
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setIsVisible(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
-    );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      id={id}
-      className={`transition-all duration-500 ease-out ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-      } ${className}`}
-    >
-      {children}
-    </div>
-  );
-};
+import { FileText, CheckCircle2, ShieldCheck, UserCheck } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
-  const { setActiveTab, openUpgradeModal, navigateToProperty } = useApp();
+  const { setActiveTab, navigateToProperty } = useApp();
 
   const sampleProperty = MOCK_PROPERTIES[0];
   const featuredProperties = MOCK_PROPERTIES.slice(0, 6);
 
-  // 1. Stats count-up hook (1 second, ease-out, respects prefers-reduced-motion)
-  const [hasLoaded, setHasLoaded] = useState(false);
-  const [yieldVal, setYieldVal] = useState(0);
-  const [occVal, setOccVal] = useState(0);
-  const [tenancyVal, setTenancyVal] = useState(0);
+  // Stats count-up hook (1 second, ease-out)
+  const [yieldVal, setYieldVal] = useState(3.8);
+  const [occVal, setOccVal] = useState(100);
+  const [tenancyVal, setTenancyVal] = useState(3);
+  const [hasAnimatedStats, setHasAnimatedStats] = useState(false);
 
   useEffect(() => {
     const isReducedMotion =
@@ -75,7 +25,7 @@ export const LandingPage: React.FC = () => {
       setYieldVal(3.8);
       setOccVal(100);
       setTenancyVal(3);
-      setHasLoaded(true);
+      setHasAnimatedStats(true);
       return;
     }
 
@@ -95,7 +45,7 @@ export const LandingPage: React.FC = () => {
       if (progress < 1) {
         animId = requestAnimationFrame(animate);
       } else {
-        setHasLoaded(true);
+        setHasAnimatedStats(true);
       }
     };
 
@@ -103,7 +53,7 @@ export const LandingPage: React.FC = () => {
     return () => cancelAnimationFrame(animId);
   }, []);
 
-  // 2. Budget Calculator State
+  // Budget Calculator State
   // Budget range: ₹50 L to ₹3 Cr, step ₹5 L, default ₹1.2 Cr (12,000,000)
   const [budget, setBudget] = useState(12000000);
 
@@ -120,8 +70,7 @@ export const LandingPage: React.FC = () => {
   const monthlyRent = Math.round((budget * 0.038 / 12) / 500) * 500;
   // Yearly rent: monthlyRent * 12
   const yearlyRent = monthlyRent * 12;
-  // Rent over 5 years with 5% yearly escalation:
-  // Year 1 + Year 1 * 1.05 + Year 1 * 1.05^2 + Year 1 * 1.05^3 + Year 1 * 1.05^4
+  // Rent over 5 years with 5% yearly escalation
   const fiveYearMultiplier = 1 + 1.05 + Math.pow(1.05, 2) + Math.pow(1.05, 3) + Math.pow(1.05, 4);
   const fiveYearRent = Math.round(yearlyRent * fiveYearMultiplier);
 
@@ -134,37 +83,8 @@ export const LandingPage: React.FC = () => {
 
   const matchingPropertiesCount = MOCK_PROPERTIES.filter(p => p.price <= budget).length;
 
-  // 3. Timeline Animation (Rent from month one)
-  const timelineRef = useRef<HTMLDivElement>(null);
-  const [timelineVisible, setTimelineVisible] = useState(() => {
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return true;
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setTimelineVisible(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimelineVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.2 }
-    );
-
-    if (timelineRef.current) {
-      observer.observe(timelineRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
+  // Percentage for gold slider filled track
+  const sliderPct = ((budget - 5000000) / (30000000 - 5000000)) * 100;
 
   const scrollToHowItWorks = () => {
     const el = document.getElementById('how-it-works');
@@ -174,33 +94,35 @@ export const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#FAFAF8] text-[#0E1A2B] overflow-x-hidden">
-      {/* 1. Hero Section */}
-      <section className="max-w-7xl mx-auto px-6 pt-[96px] pb-[80px]">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+    <div className="text-[#0E1A2B] overflow-x-hidden">
+      {/* 1. Hero Section: #FAFAF8 */}
+      <section className="bg-[#FAFAF8] pt-8 sm:pt-12 pb-24 sm:pb-32 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           
           {/* Left Column (55%) */}
           <div className="lg:col-span-7 space-y-6">
-            <span className="text-[13px] font-medium text-[#B08D4C] block tracking-normal">
+            <span className="text-[13px] font-medium text-[#B08D4C] block uppercase tracking-wider">
               Pre-rented homes · Bengaluru
             </span>
 
-            <h1 className="font-serif font-semibold text-[36px] sm:text-[56px] leading-[1.1] tracking-[-0.5px] text-[#0E1A2B]">
-              Homes that pay you from day one.
+            {/* Headline: Cormorant Garamond, "pay you" in italic gold, max-w-[12ch] */}
+            <h1 className="font-serif font-semibold text-[44px] sm:text-[60px] leading-[1.06] tracking-[-0.5px] text-[#0E1A2B] max-w-[12ch]">
+              Homes that <span className="italic text-[#B08D4C] font-normal">pay you</span> from day one.
             </h1>
 
-            <p className="text-base sm:text-lg text-[#6B7280] max-w-xl">
+            {/* Body text in 16px Inter, #4B5563 */}
+            <p className="text-[16px] text-[#4B5563] max-w-xl leading-relaxed">
               Verified residential properties with active leases and regular monthly cash flow.
             </p>
 
-            {/* Buttons */}
-            <div className="flex flex-wrap items-center gap-5 pt-1">
+            {/* Action buttons */}
+            <div className="flex flex-wrap items-center gap-5 pt-2">
               <button
                 onClick={() => {
                   setActiveTab('explore');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="bg-[#0E1A2B] text-white px-6 py-3 rounded-[12px] font-medium text-[15px] hover:bg-[#142338] transition-colors cursor-pointer"
+                className="bg-[#0E1A2B] text-white px-7 py-3.5 rounded-[12px] font-medium text-[15px] hover:bg-[#142338] transition-colors cursor-pointer shadow-xs"
               >
                 View properties
               </button>
@@ -213,35 +135,35 @@ export const LandingPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Stats with 1-second ease-out count-up */}
-            <div className="pt-6 border-t border-[#ECECE8] flex items-center gap-6 sm:gap-8">
+            {/* Stats row with 1-second count-up */}
+            <div className="pt-8 border-t border-[#ECECE8] flex items-center gap-8 sm:gap-10">
               <div>
-                <span className="block text-[22px] font-semibold text-[#0E1A2B] tabular-nums font-sans leading-none">
+                <span className="block text-[24px] font-semibold text-[#0E1A2B] tabular-nums font-sans leading-none">
                   {yieldVal.toFixed(1)}%
                 </span>
-                <span className="text-[13px] text-[#6B7280] mt-1 block">
+                <span className="text-[13px] text-[#6B7280] mt-1.5 block">
                   avg yield
                 </span>
               </div>
 
-              <div className="w-[1px] h-8 bg-[#ECECE8]" />
+              <div className="w-[1px] h-9 bg-[#ECECE8]" />
 
               <div>
-                <span className="block text-[22px] font-semibold text-[#0E1A2B] tabular-nums font-sans leading-none">
+                <span className="block text-[24px] font-semibold text-[#0E1A2B] tabular-nums font-sans leading-none">
                   {occVal}%
                 </span>
-                <span className="text-[13px] text-[#6B7280] mt-1 block">
+                <span className="text-[13px] text-[#6B7280] mt-1.5 block">
                   occupied
                 </span>
               </div>
 
-              <div className="w-[1px] h-8 bg-[#ECECE8]" />
+              <div className="w-[1px] h-9 bg-[#ECECE8]" />
 
               <div>
-                <span className="block text-[22px] font-semibold text-[#0E1A2B] tabular-nums font-sans leading-none">
-                  {hasLoaded ? '3+ yrs' : `${Math.floor(tenancyVal)}+ yrs`}
+                <span className="block text-[24px] font-semibold text-[#0E1A2B] tabular-nums font-sans leading-none">
+                  {hasAnimatedStats ? '3+ yrs' : `${Math.floor(tenancyVal)}+ yrs`}
                 </span>
-                <span className="text-[13px] text-[#6B7280] mt-1 block">
+                <span className="text-[13px] text-[#6B7280] mt-1.5 block">
                   avg tenancy
                 </span>
               </div>
@@ -249,35 +171,24 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Right Column (45%) */}
-          <div className="lg:col-span-5 relative mt-4 lg:mt-0 pb-10 sm:pb-8">
-            {/* Soft gold arch outline behind photo: same shape as logo, 1px #B08D4C at 30% opacity, offset 24px up-right */}
+          <div className="lg:col-span-5 relative mt-6 lg:mt-0 pb-12 sm:pb-8">
+            {/* Solid soft-sand arch (#EFE6D6) backdrop, offset 24px up and right */}
             <div
-              className="absolute -top-6 -right-6 w-full h-[380px] sm:h-[460px] pointer-events-none hidden sm:block z-0"
+              className="absolute -top-6 -right-6 w-full h-[460px] sm:h-[560px] bg-[#EFE6D6] pointer-events-none hidden sm:block z-0"
+              style={{ borderRadius: '999px 999px 16px 16px' }}
               aria-hidden="true"
-            >
-              <svg
-                viewBox="0 0 400 460"
-                fill="none"
-                preserveAspectRatio="none"
-                className="w-full h-full"
-              >
-                <path
-                  d="M 2 458 V 160 A 198 198 0 0 1 398 160 V 458"
-                  stroke="#B08D4C"
-                  strokeWidth="1.2"
-                  strokeOpacity="0.3"
-                  vectorEffect="non-scaling-stroke"
-                />
-              </svg>
-            </div>
+            />
 
-            {/* Building photo with 16px radius, height ~460px, object-fit cover */}
-            <div className="relative w-full h-[380px] sm:h-[460px] rounded-[16px] overflow-hidden bg-[#ECECE8] z-1">
+            {/* Hero photo taller: 560px, arch-top mask */}
+            <div
+              className="relative w-full h-[460px] sm:h-[560px] overflow-hidden bg-[#ECECE8] z-1 shadow-sm"
+              style={{ borderRadius: '999px 999px 16px 16px' }}
+            >
               <img
                 src={sampleProperty.primaryImage}
                 alt="Prestige Wildwood, Whitefield"
                 referrerPolicy="no-referrer"
-                className="w-full h-full object-cover rounded-[16px]"
+                className="w-full h-full object-cover"
                 onError={(e) => {
                   const target = e.currentTarget;
                   target.onerror = null;
@@ -286,10 +197,10 @@ export const LandingPage: React.FC = () => {
               />
             </div>
 
-            {/* Overlaid floating property card on the bottom-left corner with tiny rent sparkline */}
+            {/* Overlaid floating property card on bottom-left with rent sparkline */}
             <div
               onClick={() => navigateToProperty(sampleProperty.id)}
-              className="absolute -bottom-4 sm:-bottom-8 left-2 sm:-left-8 bg-white border border-[#ECECE8] rounded-[16px] p-4 shadow-sm z-10 w-[calc(100%-16px)] sm:w-[350px] cursor-pointer hover:border-[#B08D4C] transition-colors"
+              className="absolute -bottom-6 sm:-bottom-8 left-2 sm:-left-8 bg-white border border-[#ECECE8] rounded-[16px] p-4 shadow-md z-10 w-[calc(100%-16px)] sm:w-[350px] cursor-pointer hover:border-[#B08D4C] transition-colors"
             >
               <h3 className="font-serif font-semibold text-base sm:text-lg text-[#0E1A2B] truncate">
                 Prestige Wildwood · Whitefield
@@ -316,8 +227,8 @@ export const LandingPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Tiny rent sparkline 2022→2025 (32k, 33.6k, 35k, 36.75k) in green with label */}
-              <div className="flex items-center gap-2 pt-2 mt-2 border-t border-[#ECECE8] text-[12px]">
+              {/* Tiny rent sparkline 2022→2025 in green with label */}
+              <div className="flex items-center gap-2 pt-2.5 mt-2 border-t border-[#ECECE8] text-[12px]">
                 <svg width="60" height="18" viewBox="0 0 60 18" className="overflow-visible shrink-0" aria-hidden="true">
                   <polyline
                     fill="none"
@@ -339,364 +250,304 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 2. NEW SECTION: "See what your money earns" (right after the hero) */}
-      <FadeInSection className="max-w-4xl mx-auto px-6 py-12">
-        <div className="bg-white rounded-[16px] border border-[#ECECE8] p-6 sm:p-10 space-y-8">
+      {/* 2. Calculator Section: Soft Sand #F3EEE4 */}
+      <section className="bg-[#F3EEE4] py-20 sm:py-28 px-6 border-y border-[#E5DFD3]">
+        <div className="max-w-4xl mx-auto space-y-10">
           <div className="text-center space-y-2">
-            <h2 className="font-serif font-semibold text-2xl sm:text-3xl text-[#0E1A2B]">
+            <span className="text-[13px] font-medium text-[#B08D4C] block uppercase tracking-wider">
+              Income Potential
+            </span>
+            <h2 className="font-serif font-semibold text-[32px] sm:text-[40px] text-[#0E1A2B] leading-tight">
               See what your money earns
             </h2>
-            <p className="text-[14px] text-[#6B7280]">
-              Explore rental income based on verified Day-1 tenant yield.
+            <p className="text-[16px] text-[#4B5563] max-w-lg mx-auto">
+              Simulate cash flow from day one with verified historical tenant yields.
             </p>
           </div>
 
-          {/* Budget Slider */}
-          <div className="space-y-4 max-w-xl mx-auto">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-[#6B7280] font-medium">Your budget</span>
-              <span className="text-xl font-semibold text-[#0E1A2B] font-sans tabular-nums">
-                {formatBudgetDisplay(budget)}
-              </span>
+          {/* Calculator Card */}
+          <div className="bg-white rounded-[24px] border border-[#E5DFD3] p-8 sm:p-12 shadow-sm space-y-10">
+            {/* Budget Slider */}
+            <div className="space-y-4 max-w-xl mx-auto">
+              <div className="flex items-center justify-between">
+                <span className="text-[#4B5563] font-medium text-[15px]">Your budget</span>
+                <span className="text-2xl font-semibold text-[#0E1A2B] font-sans tabular-nums">
+                  {formatBudgetDisplay(budget)}
+                </span>
+              </div>
+
+              <input
+                type="range"
+                min={5000000}
+                max={30000000}
+                step={500000}
+                value={budget}
+                onChange={(e) => setBudget(Number(e.target.value))}
+                aria-label="Your budget slider"
+                className="gold-slider w-full cursor-pointer"
+                style={{
+                  background: `linear-gradient(to right, #B08D4C 0%, #B08D4C ${sliderPct}%, #ECECE8 ${sliderPct}%, #ECECE8 100%)`,
+                }}
+              />
+
+              <div className="flex justify-between text-xs text-[#6B7280]">
+                <span>₹50 L</span>
+                <span>₹1.75 Cr</span>
+                <span>₹3 Cr</span>
+              </div>
             </div>
 
-            <input
-              type="range"
-              min={5000000}
-              max={30000000}
-              step={500000}
-              value={budget}
-              onChange={(e) => setBudget(Number(e.target.value))}
-              aria-label="Your budget slider"
-              className="w-full h-2 bg-[#ECECE8] rounded-lg appearance-none cursor-pointer"
-            />
+            {/* Results: Monthly rent in 48px serif navy, other two results smaller below */}
+            <div className="pt-8 border-t border-[#ECECE8] space-y-8">
+              <div className="text-center">
+                <span className="text-[13px] uppercase tracking-wider text-[#6B7280] font-medium block mb-2">
+                  Monthly rent
+                </span>
+                <div className="font-serif font-bold text-[40px] sm:text-[48px] text-[#0E1A2B] tabular-nums leading-none">
+                  ₹{monthlyRent.toLocaleString('en-IN')}
+                  <span className="font-sans text-[16px] font-normal text-[#6B7280] ml-2">/ month</span>
+                </div>
+              </div>
 
-            <div className="flex justify-between text-xs text-[#6B7280]">
-              <span>₹50 L</span>
-              <span>₹1.5 Cr</span>
-              <span>₹3 Cr</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-lg mx-auto pt-6 border-t border-[#ECECE8] text-center">
+                <div>
+                  <span className="text-[13px] text-[#6B7280] block mb-1">
+                    Yearly rent
+                  </span>
+                  <div className="text-[22px] sm:text-[24px] font-semibold text-[#0E1A2B] tabular-nums font-sans">
+                    {formatLakhsCr(yearlyRent)}
+                  </div>
+                </div>
+
+                <div>
+                  <span className="text-[13px] text-[#6B7280] block mb-1">
+                    Rent over 5 years
+                  </span>
+                  <div className="text-[22px] sm:text-[24px] font-semibold text-[#2E8B6E] tabular-nums font-sans">
+                    {formatLakhsCr(fiveYearRent)}
+                  </div>
+                  <span className="text-[11px] text-[#6B7280] block mt-0.5">5% yearly escalation</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Match Link and Footnote */}
+            <div className="pt-6 text-center space-y-2 border-t border-[#ECECE8]">
+              <button
+                onClick={() => {
+                  setActiveTab('explore');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="text-[15px] font-medium text-[#0E1A2B] hover:text-[#B08D4C] transition-colors cursor-pointer inline-flex items-center gap-1.5"
+              >
+                <span>{matchingPropertiesCount} homes match this budget →</span>
+              </button>
+
+              <p className="text-xs text-[#6B7280] block">
+                Based on 3.8% average gross yield. Indicative only.
+              </p>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Three live results in large numbers (32px) */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 border-t border-[#ECECE8] text-center sm:text-left">
+      {/* 3. Featured Properties: #FAFAF8 */}
+      <section className="bg-[#FAFAF8] py-20 sm:py-28 px-6">
+        <div className="max-w-7xl mx-auto space-y-10">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <span className="text-[13px] text-[#6B7280] block mb-1">
-                Monthly rent
+              <span className="text-[13px] font-medium text-[#B08D4C] block uppercase tracking-wider mb-2">
+                Curated Listings
               </span>
-              <div className="text-[28px] sm:text-[32px] font-semibold text-[#0E1A2B] tabular-nums leading-none">
-                ₹{monthlyRent.toLocaleString('en-IN')}
-              </div>
+              <h2 className="font-serif font-semibold text-[32px] sm:text-[40px] text-[#0E1A2B] leading-tight">
+                Available properties
+              </h2>
             </div>
 
-            <div>
-              <span className="text-[13px] text-[#6B7280] block mb-1">
-                Yearly rent
-              </span>
-              <div className="text-[28px] sm:text-[32px] font-semibold text-[#0E1A2B] tabular-nums leading-none">
-                {formatLakhsCr(yearlyRent)}
-              </div>
-            </div>
-
-            <div>
-              <span className="text-[13px] text-[#6B7280] block mb-1">
-                Rent over 5 years
-              </span>
-              <div className="text-[28px] sm:text-[32px] font-semibold text-[#2E8B6E] tabular-nums leading-none">
-                {formatLakhsCr(fiveYearRent)}
-              </div>
-            </div>
-          </div>
-
-          {/* Match Link and Footnote */}
-          <div className="pt-4 text-center space-y-2 border-t border-[#ECECE8]">
             <button
               onClick={() => {
                 setActiveTab('explore');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="text-[15px] font-medium text-[#0E1A2B] hover:text-[#B08D4C] transition-colors cursor-pointer inline-flex items-center gap-1.5"
+              className="text-[15px] font-medium text-[#0E1A2B] hover:text-[#B08D4C] transition-colors cursor-pointer self-start sm:self-auto"
             >
-              <span>{matchingPropertiesCount} homes match this budget →</span>
+              View all →
             </button>
+          </div>
 
-            <p className="text-xs text-[#6B7280] block">
-              Based on 3.8% average gross yield. Indicative only.
-            </p>
+          {/* Larger cards: 3 per row, photo 4:5 portrait ratio with arch-top mask */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featuredProperties.map((property) => (
+              <PropertyCard
+                key={property.id}
+                property={property}
+                archPhoto={true}
+              />
+            ))}
           </div>
         </div>
-      </FadeInSection>
+      </section>
 
-      {/* 3. NEW SECTION: "Rent from month one" */}
-      <FadeInSection className="max-w-4xl mx-auto px-6 py-16">
-        <div ref={timelineRef} className="bg-white rounded-[16px] border border-[#ECECE8] p-6 sm:p-10 space-y-8">
-          <div className="text-center space-y-2">
-            <h2 className="font-serif font-semibold text-2xl sm:text-3xl text-[#0E1A2B]">
-              Rent from month one
+      {/* 4. "Every home is checked": Navy #0E1A2B with ivory text and gold line icons */}
+      <section className="bg-[#0E1A2B] text-[#F7F3EC] py-20 sm:py-28 px-6 border-y border-[#1C2A3D]">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-[13px] font-medium text-[#B08D4C] block uppercase tracking-wider">
+              Verification Standards
+            </span>
+            <h2 className="font-serif font-semibold text-[32px] sm:text-[40px] text-[#F7F3EC] leading-tight">
+              Every home is checked
             </h2>
-            <p className="text-[14px] text-[#6B7280]">
-              Comparing cash flow across 36 months of ownership.
+            <p className="text-[16px] text-[#9CA3AF]">
+              Independent legal, financial, and physical audits before listing.
             </p>
           </div>
 
-          {/* Month Scale Header */}
-          <div className="flex justify-between text-xs text-[#6B7280] font-sans px-1">
-            <span>Month 1</span>
-            <span>Month 12</span>
-            <span>Month 24</span>
-            <span>Month 36</span>
-          </div>
-
-          <div className="space-y-6">
-            {/* Timeline 1: Pre-rented home */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-[#0E1A2B]">Pre-rented home</span>
-                <span className="font-semibold text-[#2E8B6E] tabular-nums">₹12.6 L earned</span>
+          {/* 4 items in a row with gold line icons */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-[#142338]/80 border border-[#23354E] rounded-[16px] p-6 space-y-3">
+              <div className="w-11 h-11 rounded-lg bg-[#0E1A2B] border border-[#23354E] flex items-center justify-center text-[#B08D4C]">
+                <FileText className="w-5 h-5 text-[#B08D4C]" strokeWidth={1.5} />
               </div>
-              <div className="h-10 bg-[#ECECE8] rounded-[8px] overflow-hidden p-1">
-                <div
-                  style={{
-                    width: timelineVisible ? '100%' : '0%',
-                  }}
-                  className="h-full bg-[#2E8B6E] rounded-[6px] transition-all duration-800 ease-out flex items-center px-4 text-white text-xs sm:text-sm font-medium"
-                >
-                  <span className="whitespace-nowrap">₹12.6 L earned</span>
-                </div>
+              <h3 className="font-serif font-semibold text-xl text-[#F7F3EC]">
+                Rent agreement
+              </h3>
+              <p className="text-[14px] text-[#9CA3AF] leading-relaxed">
+                Registered agreement with audited rental escalation clauses.
+              </p>
+            </div>
+
+            <div className="bg-[#142338]/80 border border-[#23354E] rounded-[16px] p-6 space-y-3">
+              <div className="w-11 h-11 rounded-lg bg-[#0E1A2B] border border-[#23354E] flex items-center justify-center text-[#B08D4C]">
+                <CheckCircle2 className="w-5 h-5 text-[#B08D4C]" strokeWidth={1.5} />
               </div>
+              <h3 className="font-serif font-semibold text-xl text-[#F7F3EC]">
+                Dues cleared
+              </h3>
+              <p className="text-[14px] text-[#9CA3AF] leading-relaxed">
+                Zero pending society maintenance, property tax, or utility dues.
+              </p>
             </div>
 
-            {/* Timeline 2: Under-construction flat */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-[#6B7280]">Under-construction flat</span>
-                <span className="font-semibold text-[#6B7280] tabular-nums">₹2.1 L earned</span>
+            <div className="bg-[#142338]/80 border border-[#23354E] rounded-[16px] p-6 space-y-3">
+              <div className="w-11 h-11 rounded-lg bg-[#0E1A2B] border border-[#23354E] flex items-center justify-center text-[#B08D4C]">
+                <ShieldCheck className="w-5 h-5 text-[#B08D4C]" strokeWidth={1.5} />
               </div>
-              <div className="h-10 bg-[#ECECE8] rounded-[8px] overflow-hidden p-1 flex gap-1">
-                {/* 1–30 months: waiting */}
-                <div
-                  style={{
-                    width: timelineVisible ? '83.33%' : '0%',
-                  }}
-                  className="h-full bg-white border border-dashed border-[#6B7280]/40 rounded-[6px] transition-all duration-800 ease-out flex items-center justify-center text-xs text-[#6B7280] font-medium overflow-hidden px-2"
-                >
-                  <span className="whitespace-nowrap truncate">Waiting for possession (30 mos)</span>
-                </div>
-                {/* 31–36 months: rental */}
-                <div
-                  style={{
-                    width: timelineVisible ? '16.67%' : '0%',
-                  }}
-                  className="h-full bg-[#2E8B6E] rounded-[6px] transition-all duration-800 ease-out flex items-center justify-center text-white text-xs font-medium overflow-hidden px-1"
-                >
-                  <span className="whitespace-nowrap truncate">₹2.1 L</span>
-                </div>
+              <h3 className="font-serif font-semibold text-xl text-[#F7F3EC]">
+                Clear title
+              </h3>
+              <p className="text-[14px] text-[#9CA3AF] leading-relaxed">
+                Independent 30-year title search and encumbrance verification.
+              </p>
+            </div>
+
+            <div className="bg-[#142338]/80 border border-[#23354E] rounded-[16px] p-6 space-y-3">
+              <div className="w-11 h-11 rounded-lg bg-[#0E1A2B] border border-[#23354E] flex items-center justify-center text-[#B08D4C]">
+                <UserCheck className="w-5 h-5 text-[#B08D4C]" strokeWidth={1.5} />
               </div>
+              <h3 className="font-serif font-semibold text-xl text-[#F7F3EC]">
+                Tenant confirmed
+              </h3>
+              <p className="text-[14px] text-[#9CA3AF] leading-relaxed">
+                Verified employment and clean multi-year payment history.
+              </p>
             </div>
           </div>
 
-          <p className="text-center text-[15px] text-[#6B7280] font-medium pt-2">
-            Same budget. Very different first three years.
-          </p>
-        </div>
-      </FadeInSection>
-
-      {/* 4. Properties: 6 cards + "View all" */}
-      <FadeInSection className="max-w-7xl mx-auto px-6 py-16 border-t border-[#ECECE8]">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="font-serif font-semibold text-2xl sm:text-3xl text-[#0E1A2B]">
-            Available properties
-          </h2>
-          <button
-            onClick={() => {
-              setActiveTab('explore');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className="text-[14px] font-medium text-[#0E1A2B] hover:text-[#B08D4C] transition-colors cursor-pointer"
-          >
-            View all
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredProperties.map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
-        </div>
-      </FadeInSection>
-
-      {/* 5. NEW SECTION: "Every home is checked" */}
-      <FadeInSection className="max-w-7xl mx-auto px-6 py-20 border-t border-[#ECECE8]">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <h2 className="font-serif font-semibold text-2xl sm:text-3xl text-[#0E1A2B]">
-            Every home is checked
-          </h2>
-          <p className="text-[14px] text-[#6B7280] mt-2">
-            Rigorous due diligence audits before any property is listed.
-          </p>
-        </div>
-
-        {/* 4 items in a row, each with a thin-line icon, a 2–3 word title, and one short line */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-[12px] border border-[#ECECE8] p-6 space-y-3">
-            <div className="w-10 h-10 rounded-lg bg-[#FAFAF8] border border-[#ECECE8] flex items-center justify-center text-[#0E1A2B]">
-              <FileText className="w-5 h-5" strokeWidth={1.5} />
-            </div>
-            <h3 className="font-serif font-semibold text-lg text-[#0E1A2B]">
-              Rent agreement verified
-            </h3>
-            <p className="text-[13px] text-[#6B7280] leading-relaxed">
-              Registered agreements and recorded escalation clauses.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-[12px] border border-[#ECECE8] p-6 space-y-3">
-            <div className="w-10 h-10 rounded-lg bg-[#FAFAF8] border border-[#ECECE8] flex items-center justify-center text-[#0E1A2B]">
-              <CheckCircle2 className="w-5 h-5 text-[#2E8B6E]" strokeWidth={1.5} />
-            </div>
-            <h3 className="font-serif font-semibold text-lg text-[#0E1A2B]">
-              Dues cleared
-            </h3>
-            <p className="text-[13px] text-[#6B7280] leading-relaxed">
-              Zero pending society maintenance, water, or utility charges.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-[12px] border border-[#ECECE8] p-6 space-y-3">
-            <div className="w-10 h-10 rounded-lg bg-[#FAFAF8] border border-[#ECECE8] flex items-center justify-center text-[#0E1A2B]">
-              <ShieldCheck className="w-5 h-5 text-[#B08D4C]" strokeWidth={1.5} />
-            </div>
-            <h3 className="font-serif font-semibold text-lg text-[#0E1A2B]">
-              Clear title
-            </h3>
-            <p className="text-[13px] text-[#6B7280] leading-relaxed">
-              Independent 30-year title search and encumbrance audit.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-[12px] border border-[#ECECE8] p-6 space-y-3">
-            <div className="w-10 h-10 rounded-lg bg-[#FAFAF8] border border-[#ECECE8] flex items-center justify-center text-[#0E1A2B]">
-              <UserCheck className="w-5 h-5 text-[#0E1A2B]" strokeWidth={1.5} />
-            </div>
-            <h3 className="font-serif font-semibold text-lg text-[#0E1A2B]">
-              Tenant confirmed
-            </h3>
-            <p className="text-[13px] text-[#6B7280] leading-relaxed">
-              Corporate employment track and punctual payment history.
-            </p>
+          {/* Link: "See a sample report →" opening Prestige Wildwood */}
+          <div className="text-center pt-2">
+            <button
+              onClick={() => {
+                navigateToProperty('prop-1');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="text-[15px] font-medium text-[#F7F3EC] hover:text-[#B08D4C] transition-colors cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <span>See a sample report →</span>
+            </button>
           </div>
         </div>
+      </section>
 
-        {/* Link: "See a sample report →" opening Prestige Wildwood */}
-        <div className="text-center mt-10">
-          <button
-            onClick={() => {
-              navigateToProperty('prop-1');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className="text-[15px] font-medium text-[#0E1A2B] hover:text-[#B08D4C] transition-colors cursor-pointer inline-flex items-center gap-1.5"
-          >
-            <span>See a sample report →</span>
-          </button>
-        </div>
-      </FadeInSection>
-
-      {/* 6. How it works: 3 steps, 1 line each */}
-      <FadeInSection id="how-it-works" className="border-t border-[#ECECE8] bg-white py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <h2 className="font-serif font-semibold text-2xl sm:text-3xl text-[#0E1A2B] mb-12">
-            How it works
-          </h2>
+      {/* 5. How it works: Soft Sand #F3EEE4 */}
+      <section id="how-it-works" className="bg-[#F3EEE4] py-20 sm:py-28 px-6 border-b border-[#E5DFD3]">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-[13px] font-medium text-[#B08D4C] block uppercase tracking-wider">
+              Simple Process
+            </span>
+            <h2 className="font-serif font-semibold text-[32px] sm:text-[40px] text-[#0E1A2B] leading-tight">
+              How it works
+            </h2>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="space-y-2">
-              <span className="text-sm font-semibold text-[#6B7280] tabular-nums font-sans">
+            <div className="bg-white rounded-[16px] border border-[#E5DFD3] p-8 space-y-3 shadow-xs">
+              <span className="text-sm font-semibold text-[#B08D4C] tabular-nums font-sans">
                 01
               </span>
-              <p className="text-[15px] text-[#0E1A2B] font-medium font-sans">
+              <p className="text-[16px] text-[#0E1A2B] font-medium font-sans">
                 Browse verified homes with active leases.
               </p>
+              <p className="text-[14px] text-[#4B5563]">
+                Filter by yield, budget, and location with transparent tenant details.
+              </p>
             </div>
 
-            <div className="space-y-2">
-              <span className="text-sm font-semibold text-[#6B7280] tabular-nums font-sans">
+            <div className="bg-white rounded-[16px] border border-[#E5DFD3] p-8 space-y-3 shadow-xs">
+              <span className="text-sm font-semibold text-[#B08D4C] tabular-nums font-sans">
                 02
               </span>
-              <p className="text-[15px] text-[#0E1A2B] font-medium font-sans">
+              <p className="text-[16px] text-[#0E1A2B] font-medium font-sans">
                 Review past rent payments and tenant history.
               </p>
+              <p className="text-[14px] text-[#4B5563]">
+                Inspect multi-year audited rent escalation statements and lease agreements.
+              </p>
             </div>
 
-            <div className="space-y-2">
-              <span className="text-sm font-semibold text-[#6B7280] tabular-nums font-sans">
+            <div className="bg-white rounded-[16px] border border-[#E5DFD3] p-8 space-y-3 shadow-xs">
+              <span className="text-sm font-semibold text-[#B08D4C] tabular-nums font-sans">
                 03
               </span>
-              <p className="text-[15px] text-[#0E1A2B] font-medium font-sans">
+              <p className="text-[16px] text-[#0E1A2B] font-medium font-sans">
                 Complete purchase and start receiving rent.
+              </p>
+              <p className="text-[14px] text-[#4B5563]">
+                Transfer ownership while existing tenant deposits rent into your account.
               </p>
             </div>
           </div>
         </div>
-      </FadeInSection>
+      </section>
 
-      {/* 7. Membership: one plan, 3 bullet benefits, one button */}
-      <FadeInSection className="border-t border-[#ECECE8] py-20">
-        <div className="max-w-xl mx-auto px-6 text-center">
-          <h2 className="font-serif font-semibold text-2xl sm:text-3xl text-[#0E1A2B] mb-8">
-            Membership
-          </h2>
-
-          <div className="bg-white rounded-[12px] border border-[#ECECE8] p-8 text-left space-y-6">
-            <div>
-              <span className="text-[13px] text-[#6B7280] block font-sans">Plan</span>
-              <div className="text-2xl font-semibold text-[#0E1A2B] tabular-nums font-sans">
-                Membership ₹999/mo
-              </div>
-            </div>
-
-            <ul className="space-y-3 font-sans">
-              <li className="flex items-center gap-3 text-[14px] text-[#0E1A2B]">
-                <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
-                <span>Access full rent payment histories</span>
-              </li>
-              <li className="flex items-center gap-3 text-[14px] text-[#0E1A2B]">
-                <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
-                <span>View tenant background and lease terms</span>
-              </li>
-              <li className="flex items-center gap-3 text-[14px] text-[#0E1A2B]">
-                <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
-                <span>Compare properties and download reports</span>
-              </li>
-            </ul>
-
-            <button
-              onClick={() => openUpgradeModal('Join membership for complete property records')}
-              className="w-full bg-[#0E1A2B] text-white py-3 rounded-[12px] font-medium text-[15px] hover:bg-[#142338] transition-colors cursor-pointer font-sans"
-            >
-              Join now
-            </button>
-          </div>
-        </div>
-      </FadeInSection>
-
-      {/* 8. NEW SECTION: Navy Band (only one on the page, before the footer) */}
-      <FadeInSection className="w-full bg-[#0E1A2B] relative overflow-hidden py-16 sm:py-20 text-center px-6">
-        {/* Large faint gold arch outline watermark on the right */}
+      {/* 6. Final Call-to-Action Band: Full-width photo with 70% dark navy overlay */}
+      <section className="relative w-full py-28 sm:py-36 px-6 overflow-hidden flex items-center justify-center text-center">
+        {/* Full-width photo background */}
         <div
-          className="absolute right-0 top-1/2 -translate-y-1/2 w-64 sm:w-80 h-72 sm:h-96 pointer-events-none opacity-10 translate-x-12 sm:translate-x-4"
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('/images/hero.jpg')" }}
+        />
+        {/* Dark navy overlay (70%) */}
+        <div className="absolute inset-0 bg-[#0E1A2B] opacity-70" />
+
+        {/* Arch outline watermark */}
+        <div
+          className="absolute right-0 top-1/2 -translate-y-1/2 w-72 sm:w-96 h-80 sm:h-[420px] pointer-events-none opacity-15 translate-x-12 sm:translate-x-4"
           aria-hidden="true"
         >
           <svg viewBox="0 0 170 180" fill="none" className="w-full h-full">
             <path
               d="M 15 180 V 65 A 70 70 0 0 1 155 65 V 180"
               stroke="#B08D4C"
-              strokeWidth="5"
+              strokeWidth="4"
             />
           </svg>
         </div>
 
-        <div className="relative z-1 max-w-2xl mx-auto space-y-6">
-          <h2 className="font-serif font-semibold text-3xl sm:text-4xl text-[#F7F3EC]">
+        {/* Content: Centred ivory serif headline and a gold button */}
+        <div className="relative z-10 max-w-2xl mx-auto space-y-8">
+          <h2 className="font-serif font-semibold text-[36px] sm:text-[46px] text-[#F7F3EC] leading-[1.12]">
             Own a home that already pays you.
           </h2>
 
@@ -706,13 +557,13 @@ export const LandingPage: React.FC = () => {
                 setActiveTab('explore');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="bg-[#B08D4C] hover:bg-[#9b7b41] text-[#0E1A2B] font-semibold px-7 py-3.5 rounded-[12px] text-[15px] transition-colors cursor-pointer shadow-sm"
+              className="bg-[#B08D4C] hover:bg-[#9b7b41] text-[#0E1A2B] font-semibold px-8 py-4 rounded-[12px] text-[16px] transition-colors cursor-pointer shadow-lg"
             >
               View properties
             </button>
           </div>
         </div>
-      </FadeInSection>
+      </section>
     </div>
   );
 };

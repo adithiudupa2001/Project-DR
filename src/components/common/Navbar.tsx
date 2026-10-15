@@ -14,12 +14,23 @@ export const Navbar: React.FC = () => {
 
   const { compareIds } = useCompare();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleNavClick = (tabId: string) => {
     setActiveTab(tabId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Scroll listener for transparent -> white transition
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -34,10 +45,18 @@ export const Navbar: React.FC = () => {
 
   const userInitial = user?.name ? user.name.trim().charAt(0).toUpperCase() : 'U';
 
+  const isTransparent = activeTab === 'landing' && !isScrolled;
+
   return (
-    <header className="sticky top-0 z-40 bg-[#FAFAF8] border-b border-[#ECECE8] text-[#0E1A2B]">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3.5">
-        {/* Logo: inline SVG component (height 36px desktop, 28px mobile) */}
+    <header
+      className={`sticky top-0 z-40 h-[88px] flex items-center transition-all duration-300 ${
+        isTransparent
+          ? 'bg-transparent border-b border-transparent'
+          : 'bg-white/95 backdrop-blur-md border-b border-[#ECECE8] shadow-xs'
+      } text-[#0E1A2B]`}
+    >
+      <div className="w-full max-w-7xl mx-auto flex items-center justify-between px-6">
+        {/* Logo: inline SVG component (height 48px desktop, 36px mobile, arch stroke 2.5px) */}
         <button
           onClick={() => handleNavClick('landing')}
           className="flex items-center text-left focus:outline-none cursor-pointer"
@@ -45,14 +64,14 @@ export const Navbar: React.FC = () => {
         >
           <svg
             viewBox="0 0 170 44"
-            className="h-[28px] sm:h-[36px] w-auto"
+            className="h-[36px] sm:h-[48px] w-auto"
             aria-label="Rentier"
           >
             <path
               d="M4 42V18a14 14 0 0 1 28 0v24"
               fill="none"
               stroke="#B08D4C"
-              strokeWidth="2.2"
+              strokeWidth="2.5"
             />
             <text
               x="18"
@@ -78,14 +97,14 @@ export const Navbar: React.FC = () => {
           </svg>
         </button>
 
-        {/* Navigation items in Inter 15px #4B5563, active link navy with 2px gold underline */}
+        {/* Navigation items in 15px Inter, #374151, active link navy with 2px gold underline */}
         <nav className="flex items-center gap-6 sm:gap-8 text-[15px] font-normal">
           <button
             onClick={() => handleNavClick('explore')}
             className={`cursor-pointer transition-colors py-1 ${
               activeTab === 'explore'
                 ? 'text-[#0E1A2B] font-medium border-b-2 border-[#B08D4C]'
-                : 'text-[#4B5563] hover:text-[#0E1A2B] border-b-2 border-transparent'
+                : 'text-[#374151] hover:text-[#0E1A2B] border-b-2 border-transparent'
             }`}
           >
             Properties
@@ -96,7 +115,7 @@ export const Navbar: React.FC = () => {
             className={`cursor-pointer transition-colors py-1 flex items-center gap-1.5 ${
               activeTab === 'compare'
                 ? 'text-[#0E1A2B] font-medium border-b-2 border-[#B08D4C]'
-                : 'text-[#4B5563] hover:text-[#0E1A2B] border-b-2 border-transparent'
+                : 'text-[#374151] hover:text-[#0E1A2B] border-b-2 border-transparent'
             }`}
           >
             <span>Compare</span>
@@ -112,7 +131,7 @@ export const Navbar: React.FC = () => {
             className={`cursor-pointer transition-colors py-1 flex items-center gap-1.5 ${
               activeTab === 'saved'
                 ? 'text-[#0E1A2B] font-medium border-b-2 border-[#B08D4C]'
-                : 'text-[#4B5563] hover:text-[#0E1A2B] border-b-2 border-transparent'
+                : 'text-[#374151] hover:text-[#0E1A2B] border-b-2 border-transparent'
             }`}
           >
             <span>Saved</span>
@@ -135,7 +154,7 @@ export const Navbar: React.FC = () => {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-[12px] border border-[#ECECE8] p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-[12px] border border-[#ECECE8] p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150 shadow-md">
                   <div className="px-3 py-2 border-b border-[#ECECE8] mb-1">
                     <p className="text-xs text-[#6B7280]">Signed in as</p>
                     <p className="text-sm font-medium text-[#0E1A2B] truncate">{user.name}</p>
@@ -155,7 +174,7 @@ export const Navbar: React.FC = () => {
           ) : (
             <button
               onClick={openAuthModal}
-              className="text-[15px] text-[#4B5563] hover:text-[#0E1A2B] transition-colors cursor-pointer"
+              className="text-[15px] text-[#374151] hover:text-[#0E1A2B] transition-colors cursor-pointer"
             >
               Sign in
             </button>

@@ -31,9 +31,40 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Custom slider thumb styling */
-input[type="range"] {
-  accent-color: #0E1A2B;
+/* Gold slider styling */
+input[type="range"].gold-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 9999px;
+  outline: none;
+}
+
+input[type="range"].gold-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #B08D4C;
+  border: 3px solid #FFFFFF;
+  box-shadow: 0 1px 4px rgba(14, 26, 43, 0.25);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+input[type="range"].gold-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+input[type="range"].gold-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #B08D4C;
+  border: 3px solid #FFFFFF;
+  box-shadow: 0 1px 4px rgba(14, 26, 43, 0.25);
+  cursor: pointer;
 }
 
 /* Respect prefers-reduced-motion */

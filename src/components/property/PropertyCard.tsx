@@ -8,9 +8,13 @@ import { Heart } from 'lucide-react';
 interface PropertyCardProps {
   property: Property;
   compact?: boolean;
+  archPhoto?: boolean;
 }
 
-export const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
+export const PropertyCard: React.FC<PropertyCardProps> = ({
+  property,
+  archPhoto = false,
+}) => {
   const { navigateToProperty, toggleWatchlist, isWatchlisted } = useApp();
   const { isInCompare, toggleCompare } = useCompare();
 
@@ -67,65 +71,76 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
   return (
     <div
       onClick={() => navigateToProperty(property.id)}
-      className="group bg-white rounded-[12px] border border-[#ECECE8] overflow-hidden hover:border-[#B08D4C] transition-all duration-400 cursor-pointer flex flex-col justify-between"
+      className="group bg-white rounded-[16px] border border-[#ECECE8] overflow-hidden hover:border-[#B08D4C] transition-all duration-400 cursor-pointer flex flex-col justify-between"
     >
       <div>
-        {/* Photo with zoom on hover and badge */}
-        <div className="relative aspect-[16/10] overflow-hidden bg-[#ECECE8]">
-          {cardBadge && (
-            <span className="absolute top-3 left-3 bg-white/95 backdrop-blur-xs text-[#0E1A2B] text-xs font-medium px-2.5 py-1 rounded-full border border-[#ECECE8] shadow-xs z-10">
-              {cardBadge}
-            </span>
-          )}
+        {/* Photo with signature arch mask or rectangular ratio */}
+        <div className={archPhoto ? 'p-3 pb-0' : ''}>
+          <div
+            className={`relative overflow-hidden bg-[#ECECE8] ${
+              archPhoto ? 'aspect-[4/5]' : 'aspect-[16/10]'
+            }`}
+            style={
+              archPhoto
+                ? { borderRadius: '999px 999px 16px 16px' }
+                : undefined
+            }
+          >
+            {cardBadge && (
+              <span className="absolute top-3 left-3 bg-white/95 backdrop-blur-xs text-[#0E1A2B] text-xs font-medium px-2.5 py-1 rounded-full border border-[#ECECE8] shadow-xs z-10">
+                {cardBadge}
+              </span>
+            )}
 
-          <img
-            src={property.primaryImage}
-            alt={`${property.title}, ${property.corridor}`}
-            referrerPolicy="no-referrer"
-            className="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-[1.04]"
-            onError={(e) => {
-              const target = e.currentTarget;
-              target.onerror = null;
-              target.src = '/images/placeholder.svg';
-            }}
-          />
+            <img
+              src={property.primaryImage}
+              alt={`${property.title}, ${property.corridor}`}
+              referrerPolicy="no-referrer"
+              className="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-[1.04]"
+              onError={(e) => {
+                const target = e.currentTarget;
+                target.onerror = null;
+                target.src = '/images/placeholder.svg';
+              }}
+            />
+          </div>
         </div>
 
         {/* Content */}
-        <div className="p-4 space-y-3">
+        <div className="p-5 space-y-3">
           <div>
-            <h3 className="font-serif font-semibold text-lg text-[#0E1A2B] truncate group-hover:text-[#8C6D2F] transition-colors">
+            <h3 className="font-serif font-semibold text-xl text-[#0E1A2B] truncate group-hover:text-[#8C6D2F] transition-colors">
               {property.title}, {property.corridor}
             </h3>
-            <p className="text-[13px] text-[#6B7280] mt-0.5">
+            <p className="text-[14px] text-[#4B5563] mt-0.5">
               {property.bhk} BHK · {property.superBuiltUpSqft.toLocaleString()} sq ft
             </p>
           </div>
 
-          {/* 3-Figure Row */}
-          <div className="grid grid-cols-3 pt-2 border-t border-[#ECECE8] gap-2">
+          {/* Clean row: Price, Rent, and Yield (yield in green, 20px) */}
+          <div className="grid grid-cols-3 pt-3 border-t border-[#ECECE8] gap-2 items-baseline">
             <div>
-              <span className="block text-[13px] text-[#6B7280]">Price</span>
-              <span className="text-base font-semibold text-[#0E1A2B] tabular-nums whitespace-nowrap">
+              <span className="block text-[12px] text-[#6B7280]">Price</span>
+              <span className="text-[15px] sm:text-base font-semibold text-[#0E1A2B] tabular-nums whitespace-nowrap">
                 {property.priceInCrFormatted || formatPriceINR(property.price)}
               </span>
             </div>
             <div>
-              <span className="block text-[13px] text-[#6B7280]">Rent</span>
-              <span className="text-base font-semibold text-[#0E1A2B] tabular-nums whitespace-nowrap">
+              <span className="block text-[12px] text-[#6B7280]">Rent</span>
+              <span className="text-[15px] sm:text-base font-semibold text-[#0E1A2B] tabular-nums whitespace-nowrap">
                 {formatRent(property.monthlyRent)}
               </span>
             </div>
             <div>
-              <span className="block text-[13px] text-[#6B7280]">Yield</span>
-              <span className="text-base font-semibold text-[#2E8B6E] tabular-nums whitespace-nowrap">
+              <span className="block text-[12px] text-[#6B7280]">Yield</span>
+              <span className="text-[20px] font-semibold text-[#2E8B6E] tabular-nums whitespace-nowrap font-sans">
                 {property.grossYieldPct}%
               </span>
             </div>
           </div>
 
           {/* Tenancy & Rent Sparkline */}
-          <div className="space-y-1.5 pt-2 border-t border-[#ECECE8]">
+          <div className="space-y-1.5 pt-3 border-t border-[#ECECE8]">
             <div className="text-[13px] text-[#6B7280]">
               Tenant since {tenantSinceYear} · Lease to {property.tenant.leaseExpiryDate}
             </div>
@@ -152,7 +167,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
 
       {/* Actions */}
       <div
-        className="px-4 py-3 border-t border-[#ECECE8] flex items-center justify-between"
+        className="px-5 py-3.5 border-t border-[#ECECE8] flex items-center justify-between"
         onClick={(e) => e.stopPropagation()}
       >
         <label className="flex items-center gap-2 cursor-pointer select-none text-[13px] text-[#0E1A2B]">
