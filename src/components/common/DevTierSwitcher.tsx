@@ -21,12 +21,22 @@ export const DevTierSwitcher: React.FC = () => {
         <button
           onClick={() => setTier('investor')}
           className={`px-2.5 py-0.5 rounded text-xs transition-colors cursor-pointer ${
-            tier !== 'free'
+            tier === 'investor'
               ? 'bg-[#0E1A2B] text-white font-medium'
               : 'text-[#6B7280] hover:text-[#0E1A2B]'
           }`}
         >
-          Member
+          Investor
+        </button>
+        <button
+          onClick={() => setTier('pro')}
+          className={`px-2.5 py-0.5 rounded text-xs transition-colors cursor-pointer ${
+            tier === 'pro'
+              ? 'bg-[#0E1A2B] text-white font-medium'
+              : 'text-[#6B7280] hover:text-[#0E1A2B]'
+          }`}
+        >
+          Pro
         </button>
       </div>
     </div>

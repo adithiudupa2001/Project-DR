@@ -7,6 +7,7 @@ export const Navbar: React.FC = () => {
     activeTab,
     setActiveTab,
     user,
+    tier,
     openAuthModal,
     logoutUser,
     watchlist,
@@ -142,42 +143,128 @@ export const Navbar: React.FC = () => {
             )}
           </button>
 
-          {/* User profile initial in a 32px navy circle with dropdown */}
-          {user ? (
-            <div className="relative" ref={dropdownRef}>
+          {/* Membership link / Tier tag & User profile circle */}
+          {user && (tier === 'investor' || tier === 'pro') ? (
+            <div className="flex items-center gap-3">
               <button
-                onClick={() => setDropdownOpen((prev) => !prev)}
-                className="w-8 h-8 rounded-full bg-[#0E1A2B] text-white flex items-center justify-center text-sm font-medium hover:bg-[#142338] transition-colors cursor-pointer select-none focus:outline-none"
-                aria-label="User menu"
+                onClick={() => handleNavClick('membership')}
+                className="px-2 py-0.5 rounded text-xs font-medium bg-[#B08D4C]/15 text-[#B08D4C] border border-[#B08D4C]/30 hover:bg-[#B08D4C]/25 transition-colors cursor-pointer"
+                title="View membership"
               >
-                {userInitial}
+                {tier === 'investor' ? 'Investor' : 'Pro'}
               </button>
 
-              {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-[12px] border border-[#ECECE8] p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150 shadow-md">
-                  <div className="px-3 py-2 border-b border-[#ECECE8] mb-1">
-                    <p className="text-xs text-[#6B7280]">Signed in as</p>
-                    <p className="text-sm font-medium text-[#0E1A2B] truncate">{user.name}</p>
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setDropdownOpen((prev) => !prev)}
+                  className="w-8 h-8 rounded-full bg-[#0E1A2B] text-white flex items-center justify-center text-sm font-medium hover:bg-[#142338] transition-colors cursor-pointer select-none focus:outline-none"
+                  aria-label="User menu"
+                >
+                  {userInitial}
+                </button>
+
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-[12px] border border-[#ECECE8] p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150 shadow-md">
+                    <div className="px-3 py-2 border-b border-[#ECECE8] mb-1">
+                      <p className="text-xs text-[#6B7280]">Signed in as</p>
+                      <p className="text-sm font-medium text-[#0E1A2B] truncate">{user.name}</p>
+                      <span className="inline-block mt-1 text-[11px] font-medium text-[#B08D4C]">
+                        {tier === 'investor' ? 'Investor Plan' : 'Pro Plan'}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        handleNavClick('membership');
+                        setDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-[#4B5563] hover:text-[#0E1A2B] hover:bg-[#FAFAF8] rounded-md transition-colors cursor-pointer"
+                    >
+                      Membership
+                    </button>
+                    <button
+                      onClick={() => {
+                        logoutUser();
+                        setDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-[#4B5563] hover:text-[#0E1A2B] hover:bg-[#FAFAF8] rounded-md transition-colors cursor-pointer"
+                    >
+                      Sign out
+                    </button>
                   </div>
-                  <button
-                    onClick={() => {
-                      logoutUser();
-                      setDropdownOpen(false);
-                    }}
-                    className="w-full text-left px-3 py-2 text-sm text-[#4B5563] hover:text-[#0E1A2B] hover:bg-[#FAFAF8] rounded-md transition-colors cursor-pointer"
-                  >
-                    Sign out
-                  </button>
-                </div>
-              )}
+                )}
+              </div>
+            </div>
+          ) : user ? (
+            <div className="flex items-center gap-6 sm:gap-8">
+              <button
+                onClick={() => handleNavClick('membership')}
+                className={`cursor-pointer transition-colors py-1 ${
+                  activeTab === 'membership'
+                    ? 'text-[#0E1A2B] font-medium border-b-2 border-[#B08D4C]'
+                    : 'text-[#374151] hover:text-[#0E1A2B] border-b-2 border-transparent'
+                }`}
+              >
+                Membership
+              </button>
+
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setDropdownOpen((prev) => !prev)}
+                  className="w-8 h-8 rounded-full bg-[#0E1A2B] text-white flex items-center justify-center text-sm font-medium hover:bg-[#142338] transition-colors cursor-pointer select-none focus:outline-none"
+                  aria-label="User menu"
+                >
+                  {userInitial}
+                </button>
+
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-[12px] border border-[#ECECE8] p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150 shadow-md">
+                    <div className="px-3 py-2 border-b border-[#ECECE8] mb-1">
+                      <p className="text-xs text-[#6B7280]">Signed in as</p>
+                      <p className="text-sm font-medium text-[#0E1A2B] truncate">{user.name}</p>
+                      <span className="inline-block mt-1 text-[11px] text-[#6B7280]">Free Plan</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        handleNavClick('membership');
+                        setDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-[#4B5563] hover:text-[#0E1A2B] hover:bg-[#FAFAF8] rounded-md transition-colors cursor-pointer"
+                    >
+                      Upgrade plan
+                    </button>
+                    <button
+                      onClick={() => {
+                        logoutUser();
+                        setDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-[#4B5563] hover:text-[#0E1A2B] hover:bg-[#FAFAF8] rounded-md transition-colors cursor-pointer"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
-            <button
-              onClick={openAuthModal}
-              className="text-[15px] text-[#374151] hover:text-[#0E1A2B] transition-colors cursor-pointer"
-            >
-              Sign in
-            </button>
+            <div className="flex items-center gap-6 sm:gap-8">
+              <button
+                onClick={() => handleNavClick('membership')}
+                className={`cursor-pointer transition-colors py-1 ${
+                  activeTab === 'membership'
+                    ? 'text-[#0E1A2B] font-medium border-b-2 border-[#B08D4C]'
+                    : 'text-[#374151] hover:text-[#0E1A2B] border-b-2 border-transparent'
+                }`}
+              >
+                Membership
+              </button>
+
+              <button
+                onClick={openAuthModal}
+                className="text-[15px] text-[#374151] hover:text-[#0E1A2B] transition-colors cursor-pointer"
+              >
+                Sign in
+              </button>
+            </div>
           )}
         </nav>
       </div>

@@ -44,11 +44,16 @@ export const PropertyDetailPage: React.FC = () => {
     String(2026 - Math.max(1, Math.round(property.tenant.tenureMonths / 12)));
 
   const handleDownload = () => {
-    if (!isMember) {
-      openUpgradeModal('Join membership to download property reports');
+    if (tier === 'free') {
+      setActiveTab('membership');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    showToast(`Downloading report for ${property.title}`);
+    if (tier === 'investor') {
+      showToast('PDF downloads are available on Pro');
+      return;
+    }
+    showToast(`Downloading report PDF for ${property.title}`);
   };
 
   const handleInterestSubmit = (e: React.FormEvent) => {
@@ -214,6 +219,11 @@ export const PropertyDetailPage: React.FC = () => {
           >
             <Download className="w-4 h-4 text-[#6B7280]" />
             <span>Download report</span>
+            {tier !== 'pro' && (
+              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#B08D4C]/15 text-[#B08D4C] border border-[#B08D4C]/30">
+                Pro
+              </span>
+            )}
           </button>
         </div>
 
@@ -229,10 +239,13 @@ export const PropertyDetailPage: React.FC = () => {
                   Members only
                 </p>
                 <button
-                  onClick={() => openUpgradeModal('Join membership to view rent history')}
+                  onClick={() => {
+                    setActiveTab('membership');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
                   className="bg-[#0E1A2B] text-white px-5 py-2 rounded-[10px] text-sm font-medium hover:bg-[#142338] transition-colors cursor-pointer"
                 >
-                  Join
+                  Membership
                 </button>
               </div>
             </div>
@@ -271,15 +284,18 @@ export const PropertyDetailPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center bg-white/70">
                   <p className="text-[15px] font-medium text-[#0E1A2B] mb-2">
                     Members only
                   </p>
                   <button
-                    onClick={() => openUpgradeModal('Join membership to view tenant details')}
+                    onClick={() => {
+                      setActiveTab('membership');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
                     className="bg-[#0E1A2B] text-white px-5 py-2 rounded-[10px] text-sm font-medium hover:bg-[#142338] transition-colors cursor-pointer"
                   >
-                    Join
+                    Membership
                   </button>
                 </div>
               </div>
@@ -350,26 +366,137 @@ export const PropertyDetailPage: React.FC = () => {
         </div>
 
         {/* Checks: one line of 4 ticks (Agreement, Dues, Title, Tenant) */}
-        <div className="bg-white rounded-[12px] border border-[#ECECE8] p-6 space-y-4">
-          <h3 className="font-serif font-semibold text-xl text-[#0E1A2B]">Checks</h3>
+        <div className="relative">
+          <div className="bg-white rounded-[12px] border border-[#ECECE8] p-6 space-y-4">
+            <h3 className="font-serif font-semibold text-xl text-[#0E1A2B]">Checks</h3>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-1">
-            <div className="flex items-center gap-2 text-[14px] text-[#0E1A2B]">
-              <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
-              <span>Agreement</span>
+            {!isMember ? (
+              <div className="relative">
+                <div className="filter blur-sm select-none pointer-events-none opacity-40 grid grid-cols-2 sm:grid-cols-4 gap-4 pt-1">
+                  <div className="flex items-center gap-2 text-[14px] text-[#0E1A2B]">
+                    <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
+                    <span>Agreement</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[14px] text-[#0E1A2B]">
+                    <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
+                    <span>Dues</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[14px] text-[#0E1A2B]">
+                    <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
+                    <span>Title</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[14px] text-[#0E1A2B]">
+                    <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
+                    <span>Tenant</span>
+                  </div>
+                </div>
+
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center bg-white/70">
+                  <p className="text-[15px] font-medium text-[#0E1A2B] mb-2">
+                    Members only
+                  </p>
+                  <button
+                    onClick={() => {
+                      setActiveTab('membership');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="bg-[#0E1A2B] text-white px-5 py-2 rounded-[10px] text-sm font-medium hover:bg-[#142338] transition-colors cursor-pointer"
+                  >
+                    Membership
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-1">
+                <div className="flex items-center gap-2 text-[14px] text-[#0E1A2B]">
+                  <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
+                  <span>Agreement</span>
+                </div>
+                <div className="flex items-center gap-2 text-[14px] text-[#0E1A2B]">
+                  <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
+                  <span>Dues</span>
+                </div>
+                <div className="flex items-center gap-2 text-[14px] text-[#0E1A2B]">
+                  <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
+                  <span>Title</span>
+                </div>
+                <div className="flex items-center gap-2 text-[14px] text-[#0E1A2B]">
+                  <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
+                  <span>Tenant</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Locality rent trends */}
+        <div className="relative">
+          <div className="bg-white rounded-[12px] border border-[#ECECE8] p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif font-semibold text-xl text-[#0E1A2B]">
+                Locality rent trends
+              </h3>
+              {tier !== 'pro' && (
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-[#B08D4C]/15 text-[#B08D4C] border border-[#B08D4C]/30">
+                  Pro
+                </span>
+              )}
             </div>
-            <div className="flex items-center gap-2 text-[14px] text-[#0E1A2B]">
-              <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
-              <span>Dues</span>
-            </div>
-            <div className="flex items-center gap-2 text-[14px] text-[#0E1A2B]">
-              <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
-              <span>Title</span>
-            </div>
-            <div className="flex items-center gap-2 text-[14px] text-[#0E1A2B]">
-              <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
-              <span>Tenant</span>
-            </div>
+
+            {!isMember ? (
+              <div className="relative">
+                <div className="filter blur-sm select-none pointer-events-none opacity-40 grid grid-cols-2 sm:grid-cols-3 gap-4 pt-1">
+                  <div>
+                    <span className="block text-[13px] text-[#6B7280]">Rent growth</span>
+                    <span className="text-[15px] font-medium text-[#2E8B6E]">+8.4% YoY</span>
+                  </div>
+                  <div>
+                    <span className="block text-[13px] text-[#6B7280]">Corridor yield</span>
+                    <span className="text-[15px] font-medium text-[#0E1A2B]">3.9%</span>
+                  </div>
+                  <div>
+                    <span className="block text-[13px] text-[#6B7280]">Avg rate</span>
+                    <span className="text-[15px] font-medium text-[#0E1A2B]">₹38/sq ft</span>
+                  </div>
+                </div>
+
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center bg-white/70">
+                  <p className="text-[15px] font-medium text-[#0E1A2B] mb-2">
+                    Members only
+                  </p>
+                  <button
+                    onClick={() => {
+                      setActiveTab('membership');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="bg-[#0E1A2B] text-white px-5 py-2 rounded-[10px] text-sm font-medium hover:bg-[#142338] transition-colors cursor-pointer"
+                  >
+                    Membership
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-1">
+                <div>
+                  <span className="block text-[13px] text-[#6B7280]">Rent growth</span>
+                  <span className="text-[15px] font-medium text-[#2E8B6E] tabular-nums">
+                    +8.4% YoY
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-[13px] text-[#6B7280]">Corridor yield</span>
+                  <span className="text-[15px] font-medium text-[#0E1A2B] tabular-nums">
+                    3.9% avg
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-[13px] text-[#6B7280]">Avg rate</span>
+                  <span className="text-[15px] font-medium text-[#0E1A2B] tabular-nums">
+                    ₹38/sq ft/mo
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -77,8 +77,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return (saved as Currency) || 'INR';
   });
 
-  const [activeTab, setActiveTab] = useState<string>('landing');
+  const [activeTab, setActiveTabState] = useState<string>(() => {
+    if (typeof window !== 'undefined' && window.location.pathname === '/membership') {
+      return 'membership';
+    }
+    return 'landing';
+  });
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>('prop-1');
+
+  const setActiveTab = (tab: string) => {
+    setActiveTabState(tab);
+    if (typeof window !== 'undefined') {
+      if (tab === 'membership') {
+        window.history.pushState({}, '', '/membership');
+      } else if (tab === 'landing') {
+        window.history.pushState({}, '', '/');
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (window.location.pathname === '/membership') {
+        setActiveTabState('membership');
+      } else {
+        setActiveTabState('landing');
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const [watchlist, setWatchlist] = useState<string[]>(() => {
     try {

@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MOCK_PROPERTIES } from '../../data/mockProperties';
 import { PropertyCard } from '../property/PropertyCard';
-import { FileText, CheckCircle2, ShieldCheck, UserCheck } from 'lucide-react';
+import { FileText, CheckCircle2, ShieldCheck, UserCheck, Check } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
-  const { setActiveTab, navigateToProperty } = useApp();
+  const { setActiveTab, navigateToProperty, setTier, tier, showToast } = useApp();
+  const [isYearly, setIsYearly] = useState(false);
 
   const sampleProperty = MOCK_PROPERTIES[0];
   const featuredProperties = MOCK_PROPERTIES.slice(0, 6);
@@ -521,7 +522,225 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 6. Final Call-to-Action Band: Full-width photo with 70% dark navy overlay */}
+      {/* 6. Membership Section: #FAFAF8 */}
+      <section className="bg-[#FAFAF8] py-20 sm:py-28 px-6 border-b border-[#ECECE8]">
+        <div className="max-w-7xl mx-auto space-y-12">
+          {/* Eyebrow & Title */}
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-[13px] font-medium text-[#B08D4C] block uppercase tracking-wider">
+              Membership
+            </span>
+            <h2 className="font-serif font-semibold text-[32px] sm:text-[40px] text-[#0E1A2B] leading-tight">
+              Choose your plan
+            </h2>
+
+            {/* Monthly / Yearly toggle (Yearly = 2 months free) */}
+            <div className="pt-4 inline-flex items-center gap-2 bg-[#ECECE8] p-1 rounded-full text-xs font-medium">
+              <button
+                onClick={() => setIsYearly(false)}
+                className={`px-4 py-1.5 rounded-full transition-colors cursor-pointer ${
+                  !isYearly
+                    ? 'bg-[#0E1A2B] text-white shadow-xs'
+                    : 'text-[#4B5563] hover:text-[#0E1A2B]'
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setIsYearly(true)}
+                className={`px-4 py-1.5 rounded-full transition-colors flex items-center gap-1.5 cursor-pointer ${
+                  isYearly
+                    ? 'bg-[#0E1A2B] text-white shadow-xs'
+                    : 'text-[#4B5563] hover:text-[#0E1A2B]'
+                }`}
+              >
+                <span>Yearly</span>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#2E8B6E] text-white">
+                  2 months free
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Three cards in a row (stacked on mobile), equal height, max 5 bullets each */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch pt-2">
+            {/* FREE (white card, 1px #ECECE8 border) */}
+            <div className="bg-white rounded-[16px] border border-[#ECECE8] p-8 flex flex-col justify-between">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-serif font-semibold text-2xl text-[#0E1A2B]">
+                    Free
+                  </h3>
+                  <div className="mt-3">
+                    <span className="font-serif text-4xl font-semibold text-[#0E1A2B]">₹0</span>
+                  </div>
+                  <span className="block text-xs text-[#6B7280] mt-1">Free forever</span>
+                </div>
+
+                <ul className="space-y-3 text-[14px] text-[#374151]">
+                  <li className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
+                    <span>Browse all properties</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
+                    <span>Price, rent, and yield</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
+                    <span>Save favourites</span>
+                  </li>
+                </ul>
+              </div>
+
+              <button
+                onClick={() => {
+                  setActiveTab('explore');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="mt-8 w-full border border-[#0E1A2B] text-[#0E1A2B] hover:bg-[#0E1A2B] hover:text-white py-3 rounded-[12px] font-medium text-[15px] transition-colors cursor-pointer text-center"
+              >
+                Start browsing
+              </button>
+            </div>
+
+            {/* INVESTOR (navy #0E1A2B card, ivory text, 1px gold border, gold pill "Most popular", slightly raised above the others) */}
+            <div className="bg-[#0E1A2B] text-[#F7F3EC] rounded-[16px] border border-[#B08D4C] p-8 flex flex-col justify-between relative md:-translate-y-2 shadow-xl">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#B08D4C] text-[#0E1A2B] text-[11px] font-semibold px-3 py-0.5 rounded-full uppercase tracking-wider">
+                Most popular
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-serif font-semibold text-2xl text-[#F7F3EC]">
+                    Investor
+                  </h3>
+                  <div className="mt-3 flex items-baseline gap-1.5">
+                    <span className="font-serif text-4xl font-semibold text-[#F7F3EC] tabular-nums">
+                      {isYearly ? '₹9,990' : '₹999'}
+                    </span>
+                    <span className="text-sm text-[#9CA3AF]">
+                      {isYearly ? '/yr' : '/mo'}
+                    </span>
+                  </div>
+                  <div className="text-xs text-[#B08D4C] mt-1 font-sans">
+                    ₹999/mo · ₹9,990/yr
+                  </div>
+                  <div className="text-xs text-[#9CA3AF] mt-0.5">
+                    {isYearly ? '≈ $120/yr' : '≈ $12/mo'}
+                  </div>
+                </div>
+
+                <ul className="space-y-3 text-[14px] text-[#E5E7EB]">
+                  <li className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-[#B08D4C] shrink-0" />
+                    <span>Full rent history</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-[#B08D4C] shrink-0" />
+                    <span>Tenant details and lease terms</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-[#B08D4C] shrink-0" />
+                    <span>Verification report</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-[#B08D4C] shrink-0" />
+                    <span>Compare up to 4 homes</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-[#B08D4C] shrink-0" />
+                    <span>New listing alerts</span>
+                  </li>
+                </ul>
+              </div>
+
+              <button
+                onClick={() => {
+                  setTier('investor');
+                  showToast('Welcome to Investor plan');
+                }}
+                className={`mt-8 w-full py-3 rounded-[12px] font-semibold text-[15px] transition-colors cursor-pointer text-center ${
+                  tier === 'investor'
+                    ? 'bg-[#2E8B6E] text-white cursor-default'
+                    : 'bg-[#B08D4C] hover:bg-[#9b7b41] text-[#0E1A2B]'
+                }`}
+              >
+                {tier === 'investor' ? 'Active plan' : 'Become an investor'}
+              </button>
+            </div>
+
+            {/* PRO (white card, 1px #ECECE8 border) */}
+            <div className="bg-white rounded-[16px] border border-[#ECECE8] p-8 flex flex-col justify-between">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-serif font-semibold text-2xl text-[#0E1A2B]">
+                    Pro
+                  </h3>
+                  <div className="mt-3 flex items-baseline gap-1.5">
+                    <span className="font-serif text-4xl font-semibold text-[#0E1A2B] tabular-nums">
+                      {isYearly ? '₹24,990' : '₹2,499'}
+                    </span>
+                    <span className="text-sm text-[#6B7280]">
+                      {isYearly ? '/yr' : '/mo'}
+                    </span>
+                  </div>
+                  <div className="text-xs text-[#6B7280] mt-1 font-sans">
+                    ₹2,499/mo · ₹24,990/yr
+                  </div>
+                  <div className="text-xs text-[#6B7280] mt-0.5">
+                    {isYearly ? '≈ $300/yr' : '≈ $30/mo'}
+                  </div>
+                </div>
+
+                <ul className="space-y-3 text-[14px] text-[#374151]">
+                  <li className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
+                    <span>Everything in Investor</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
+                    <span>Download reports (PDF)</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
+                    <span>Locality rent trends</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
+                    <span>Early access, 24 hours</span>
+                  </li>
+                  <li className="flex items-center gap-2.5">
+                    <Check className="w-4 h-4 text-[#2E8B6E] shrink-0" />
+                    <span>Priority owner contact</span>
+                  </li>
+                </ul>
+              </div>
+
+              <button
+                onClick={() => {
+                  setTier('pro');
+                  showToast('Upgraded to Pro plan');
+                }}
+                className={`mt-8 w-full border border-[#0E1A2B] py-3 rounded-[12px] font-medium text-[15px] transition-colors cursor-pointer text-center ${
+                  tier === 'pro'
+                    ? 'bg-[#0E1A2B] text-white cursor-default'
+                    : 'text-[#0E1A2B] hover:bg-[#0E1A2B] hover:text-white'
+                }`}
+              >
+                {tier === 'pro' ? 'Active plan' : 'Go Pro'}
+              </button>
+            </div>
+          </div>
+
+          {/* Below the cards, one muted line: "Cancel anytime." */}
+          <p className="text-center text-sm text-[#6B7280] pt-2">
+            Cancel anytime.
+          </p>
+        </div>
+      </section>
+
+      {/* 7. Final Call-to-Action Band: Full-width photo with 70% dark navy overlay */}
       <section className="relative w-full py-28 sm:py-36 px-6 overflow-hidden flex items-center justify-center text-center">
         {/* Full-width photo background */}
         <div

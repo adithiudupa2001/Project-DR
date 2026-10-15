@@ -9,6 +9,7 @@ export const UpgradeModal: React.FC = () => {
     upgradeReason,
     tier,
     setTier,
+    setActiveTab,
     showToast,
   } = useApp();
 
@@ -82,6 +83,17 @@ export const UpgradeModal: React.FC = () => {
             className="w-full bg-[#0E1A2B] text-white py-3 rounded-[12px] font-medium text-[15px] hover:bg-[#142338] transition-colors cursor-pointer"
           >
             {tier === 'free' ? 'Join membership' : 'Keep membership'}
+          </button>
+
+          <button
+            onClick={() => {
+              closeUpgradeModal();
+              setActiveTab('membership');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="w-full text-center text-xs font-medium text-[#B08D4C] hover:underline py-1 cursor-pointer"
+          >
+            View all plans →
           </button>
 
           {tier !== 'free' && (

@@ -397,10 +397,13 @@ export const ComparePage: React.FC = () => {
                 Join membership to unlock verified tenant profiles and legal checks.
               </p>
               <button
-                onClick={() => openUpgradeModal('Join membership to compare tenant & diligence records')}
+                onClick={() => {
+                  setActiveTab('membership');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 className="bg-[#0E1A2B] text-white px-5 py-2 rounded-[10px] text-sm font-medium hover:bg-[#142338] transition-colors cursor-pointer"
               >
-                Join
+                Membership
               </button>
             </div>
           )}

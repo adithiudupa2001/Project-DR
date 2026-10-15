@@ -71,6 +71,12 @@ export const Footer: React.FC = () => {
             Saved
           </button>
           <button
+            onClick={() => handleNavClick('membership')}
+            className="hover:text-[#F7F3EC] transition-colors cursor-pointer"
+          >
+            Membership
+          </button>
+          <button
             onClick={() => handleNavClick('faq')}
             className="hover:text-[#F7F3EC] transition-colors cursor-pointer"
           >

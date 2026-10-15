@@ -14,6 +14,7 @@ import { PropertyDetailPage } from './components/pages/PropertyDetailPage';
 import { ComparePage } from './components/pages/ComparePage';
 import { SavedPage } from './components/pages/SavedPage';
 import { FaqPage } from './components/pages/FaqPage';
+import { PricingPage } from './components/pages/PricingPage';
 import { Check } from 'lucide-react';
 
 const AppContent: React.FC = () => {
@@ -34,6 +35,9 @@ const AppContent: React.FC = () => {
         return <SavedPage />;
       case 'faq':
         return <FaqPage />;
+      case 'membership':
+      case 'pricing':
+        return <PricingPage />;
       default:
         return <LandingPage />;
     }
