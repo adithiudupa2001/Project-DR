@@ -1,11 +1,10 @@
 import { Property } from '../types/property';
 
-// High-fidelity image assets generated for Rentier
 export const ASSET_IMAGES = {
-  hero: '/src/assets/images/hero_bengaluru_residence_1791908957250.jpg',
-  prestigeWildwood: '/src/assets/images/prop_prestige_wildwood_1791908957691.jpg',
-  sobhaGreenAcres: '/src/assets/images/prop_sobha_greenacres_1791908958859.jpg',
-  brigadeLakeview: '/src/assets/images/prop_brigade_lakeview_1791908959998.jpg',
+  hero: '/images/hero.jpg',
+  prestigeWildwood: '/images/property-1.jpg',
+  sobhaGreenAcres: '/images/property-2.jpg',
+  brigadeLakeview: '/images/property-3.jpg',
 };
 
 export const MOCK_PROPERTIES: Property[] = [

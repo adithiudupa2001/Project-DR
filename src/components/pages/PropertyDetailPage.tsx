@@ -113,6 +113,11 @@ export const PropertyDetailPage: React.FC = () => {
               alt={property.title}
               referrerPolicy="no-referrer"
               className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.currentTarget;
+                target.onerror = null;
+                target.src = '/images/placeholder.svg';
+              }}
             />
           </div>
 
@@ -133,6 +138,11 @@ export const PropertyDetailPage: React.FC = () => {
                     alt=""
                     className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      target.onerror = null;
+                      target.src = '/images/placeholder.svg';
+                    }}
                   />
                 </button>
               ))}

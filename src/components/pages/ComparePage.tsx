@@ -118,6 +118,11 @@ export const ComparePage: React.FC = () => {
                             alt={prop.title}
                             referrerPolicy="no-referrer"
                             className="w-full h-28 object-cover rounded-lg bg-[#ECECE8]"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              target.onerror = null;
+                              target.src = '/images/placeholder.svg';
+                            }}
                           />
                           <h3 className="font-serif font-semibold text-base text-[#0E1A2B] mt-2 group-hover:text-[#B08D4C] transition-colors truncate">
                             {prop.title}

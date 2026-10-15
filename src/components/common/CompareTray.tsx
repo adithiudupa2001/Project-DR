@@ -50,6 +50,11 @@ export const CompareTray: React.FC = () => {
                   alt={property.title}
                   referrerPolicy="no-referrer"
                   className="w-6 h-6 rounded object-cover"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    target.onerror = null;
+                    target.src = '/images/placeholder.svg';
+                  }}
                 />
                 <span className="text-xs font-medium text-[#0E1A2B] max-w-[120px] truncate">
                   {property.title}

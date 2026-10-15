@@ -42,7 +42,9 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
             referrerPolicy="no-referrer"
             className="w-full h-full object-cover"
             onError={(e) => {
-              (e.target as HTMLElement).style.display = 'none';
+              const target = e.currentTarget;
+              target.onerror = null;
+              target.src = '/images/placeholder.svg';
             }}
           />
         </div>

@@ -104,6 +104,11 @@ export const LandingPage: React.FC = () => {
                 alt="Prestige Wildwood, Whitefield"
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover rounded-[16px]"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  target.onerror = null;
+                  target.src = '/images/placeholder.svg';
+                }}
               />
             </div>
 
