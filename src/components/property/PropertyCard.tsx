@@ -17,7 +17,6 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
   const watchlisted = isWatchlisted(property.id);
   const inCompare = isInCompare(property.id);
 
-
   const handleWatchlistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     toggleWatchlist(property.id);
@@ -28,19 +27,62 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
     property.tenant.tenureStartFormatted.match(/\b(20\d\d)\b/)?.[1] ||
     String(2026 - Math.max(1, Math.round(property.tenant.tenureMonths / 12)));
 
+  // Rent growth & sparkline data computed from rentalHistory
+  const history = property.rentalHistory || [];
+  const firstRent = history.length > 0 ? history[0].monthlyRent : Math.round(property.monthlyRent * 0.85);
+  const lastRent = history.length > 0 ? history[history.length - 1].monthlyRent : property.monthlyRent;
+  const growthPct = Math.max(1, Math.round(((lastRent - firstRent) / firstRent) * 100));
+
+  const startYear = history.length > 0
+    ? history[0].year.slice(0, 4)
+    : tenantSinceYear || '2022';
+
+  const sparklineRentValues = history.length >= 4
+    ? history.slice(0, 4).map(h => h.monthlyRent)
+    : [
+        firstRent,
+        Math.round(firstRent + (lastRent - firstRent) * 0.35),
+        Math.round(firstRent + (lastRent - firstRent) * 0.7),
+        lastRent,
+      ];
+  const minVal = Math.min(...sparklineRentValues);
+  const maxVal = Math.max(...sparklineRentValues);
+  const range = maxVal - minVal || 1;
+  const sparklinePoints = sparklineRentValues
+    .map((val, idx) => {
+      const x = 2 + idx * 18;
+      const y = 14 - Math.round(((val - minVal) / range) * 10);
+      return `${x},${y}`;
+    })
+    .join(' ');
+  const lastPoint = sparklinePoints.split(' ').pop()?.split(',') || ['56', '4'];
+
+  // Card badge: "Just listed" on prop-1, "Lease renewed" on prop-3
+  const cardBadge = property.id === 'prop-1'
+    ? 'Just listed'
+    : property.id === 'prop-3'
+    ? 'Lease renewed'
+    : null;
+
   return (
     <div
       onClick={() => navigateToProperty(property.id)}
-      className="bg-white rounded-[12px] border border-[#ECECE8] overflow-hidden hover:border-[#0E1A2B]/30 transition-colors cursor-pointer flex flex-col justify-between"
+      className="group bg-white rounded-[12px] border border-[#ECECE8] overflow-hidden hover:border-[#B08D4C] transition-all duration-400 cursor-pointer flex flex-col justify-between"
     >
       <div>
-        {/* Photo */}
+        {/* Photo with zoom on hover and badge */}
         <div className="relative aspect-[16/10] overflow-hidden bg-[#ECECE8]">
+          {cardBadge && (
+            <span className="absolute top-3 left-3 bg-white/95 backdrop-blur-xs text-[#0E1A2B] text-xs font-medium px-2.5 py-1 rounded-full border border-[#ECECE8] shadow-xs z-10">
+              {cardBadge}
+            </span>
+          )}
+
           <img
             src={property.primaryImage}
             alt={`${property.title}, ${property.corridor}`}
             referrerPolicy="no-referrer"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-400 ease-out group-hover:scale-[1.04]"
             onError={(e) => {
               const target = e.currentTarget;
               target.onerror = null;
@@ -52,7 +94,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
         {/* Content */}
         <div className="p-4 space-y-3">
           <div>
-            <h3 className="font-serif font-semibold text-lg text-[#0E1A2B] truncate">
+            <h3 className="font-serif font-semibold text-lg text-[#0E1A2B] truncate group-hover:text-[#8C6D2F] transition-colors">
               {property.title}, {property.corridor}
             </h3>
             <p className="text-[13px] text-[#6B7280] mt-0.5">
@@ -82,9 +124,28 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
             </div>
           </div>
 
-          {/* Tenancy Line */}
-          <div className="text-[13px] text-[#6B7280]">
-            Tenant since {tenantSinceYear} · Lease to {property.tenant.leaseExpiryDate}
+          {/* Tenancy & Rent Sparkline */}
+          <div className="space-y-1.5 pt-2 border-t border-[#ECECE8]">
+            <div className="text-[13px] text-[#6B7280]">
+              Tenant since {tenantSinceYear} · Lease to {property.tenant.leaseExpiryDate}
+            </div>
+
+            <div className="flex items-center gap-2 text-[12px]">
+              <svg width="60" height="18" viewBox="0 0 60 18" className="overflow-visible shrink-0" aria-hidden="true">
+                <polyline
+                  fill="none"
+                  stroke="#2E8B6E"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  points={sparklinePoints}
+                />
+                <circle cx={lastPoint[0]} cy={lastPoint[1]} r="2" fill="#2E8B6E" />
+              </svg>
+              <span className="font-medium text-[#2E8B6E] tabular-nums font-sans">
+                ↑{growthPct}% since {startYear}
+              </span>
+            </div>
           </div>
         </div>
       </div>
