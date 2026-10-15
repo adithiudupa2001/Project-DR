@@ -141,7 +141,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const exists = prev.includes(propertyId);
       const updated = exists ? prev.filter(id => id !== propertyId) : [...prev, propertyId];
       localStorage.setItem('rentier_watchlist', JSON.stringify(updated));
-      showToast(exists ? 'Removed from Watchlist' : 'Saved to Watchlist');
+      showToast(exists ? 'Removed from saved' : 'Saved');
       return updated;
     });
   };

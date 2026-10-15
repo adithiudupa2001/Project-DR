@@ -1,23 +1,29 @@
 @import "tailwindcss";
 
 @theme {
-  --font-serif: 'Playfair Display', Georgia, serif;
-  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Custom scrollbar and smooth transitions */
+/* Base styles */
 html {
   scroll-behavior: smooth;
   font-family: var(--font-sans);
+  background-color: #FAFAF8;
+  color: #0E1A2B;
+}
+
+body {
+  background-color: #FAFAF8;
+  color: #0E1A2B;
 }
 
 .font-serif {
   font-family: var(--font-serif);
 }
 
-.font-mono {
-  font-family: var(--font-mono);
+.font-sans {
+  font-family: var(--font-sans);
 }
 
 /* Tabular figures for financial numbers */
